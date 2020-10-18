@@ -21,10 +21,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('auth/login', 'Api\AuthController@login');
 Route::get('auth/me', 'Api\AuthController@me');
+Route::get('users', 'Api\UserController@index');
+
+Route::get('derivacao/teste', 'Api\CalculoProposicionalController@Teste');
+Route::post('derivacao/inicializacao', 'Api\CalculoProposicionalController@Derivacao');
+Route::post('derivacao/derivar', 'Api\CalculoProposicionalController@Derivar');
 
 Route::group(['middleware'=>['apiJwt']],function(){
     Route::post('auth/logout', 'Api\AuthController@logout');
-    Route::get('users', 'Api\UserController@index');
+    // Route::get('users', 'Api\UserController@index');
 
 
     Route::get('recompensas', 'Api\RecompensaController@index');
@@ -38,4 +43,10 @@ Route::group(['middleware'=>['apiJwt']],function(){
     Route::delete('mvflp/niveis/{id}', 'Api\NivelMvflpController@destroy');
 
     Route::get('mvflp/exercicio/nivel/{id}', 'Api\ExercicioMvflpController@byIdNivel');
+
+
+
+
+
+
 });
