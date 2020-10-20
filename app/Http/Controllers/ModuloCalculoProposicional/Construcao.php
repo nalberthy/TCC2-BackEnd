@@ -48,10 +48,14 @@ class Construcao extends Controller
         return $derivacoes;
     }   
 
-    public function aplicarRegra($derivacoes,$linha1,$linha2,$regra,$xml_entrada){
+    public function aplicarRegra($derivacoes,$linha1,$linha2,$linha3,$regra,$xml_entrada){
         $linha1=$linha1-1;
+        
         if ($linha2 != null){
             $linha2=$linha2-1;
+        }
+        if ($linha3 != null){
+            $linha3=$linha3-1;
         }
        
         
@@ -62,6 +66,10 @@ class Construcao extends Controller
         }
  
         if($linha2 >= count($derivacoes)){
+            
+            return False;
+        }
+        if($linha3 >= count($derivacoes)){
             
             return False;
         }
@@ -157,7 +165,7 @@ class Construcao extends Controller
     public function gerarPasso($derivacao,$passo){
         if($passo!=[]){
             foreach ($passo as $i) {
-                $derivacao= $this->aplicarRegra($derivacao,$i['entrada1'],$i['entrada2'],$i['regra'],$i['xml_entrada']);
+                $derivacao= $this->aplicarRegra($derivacao,$i['entrada1'],$i['entrada2'],$i['entrada3'],$i['regra'],$i['xml_entrada']);
             }
             return $derivacao;
         }

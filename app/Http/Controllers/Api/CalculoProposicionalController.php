@@ -88,8 +88,7 @@ class CalculoProposicionalController extends Controller
         #Deriva a tentativa atual, caso der erro, retorna valor boleano 
         if($formulario['entrada1']){
           
-          
-            $derivacaofinal=$this->constr->aplicarRegra($derivacaoPasso,$formulario['entrada1'],$formulario['entrada2'],$formulario['regra'],$formulario['xml_entrada']);
+            $derivacaofinal=$this->constr->aplicarRegra($derivacaoPasso,$formulario['entrada1'],$formulario['entrada2'],$formulario['entrada3'],$formulario['regra'],$formulario['xml_entrada']);
                
             // dd($derivacaoPasso);
             // else{
@@ -117,8 +116,8 @@ class CalculoProposicionalController extends Controller
         else{
             $derivacoes=$this->constr->gerar($derivacaofinal,$premissas);
             $formula=$this->arg->formula($premissas,$conclusao);
-           
-            array_push( $listaDerivacoes, ['entrada1'=>$formulario['entrada1'],'entrada2'=>$formulario['entrada2'],'regra'=>$formulario['regra'],'xml_entrada'=>$formulario['xml_entrada']]);
+            
+            array_push( $listaDerivacoes, ['entrada1'=>$formulario['entrada1'],'entrada2'=>$formulario['entrada2'],'entrada3'=>$formulario['entrada3'],'regra'=>$formulario['regra'],'xml_entrada'=>$formulario['xml_entrada']]);
             $listaDerivacoes =json_encode ($listaDerivacoes);
             
         }
