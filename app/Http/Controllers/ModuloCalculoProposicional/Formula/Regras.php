@@ -33,19 +33,12 @@ class Regras extends Controller
         }
     }
 
-    public function IntroducaoDisjuncao($derivacao,$premissa1,$entrada_premissa){
+    public function IntroducaoDisjuncao($derivacao,$premissa1, $xml_entrada){
+       
         $newpremissa1 = clone $premissa1->getPremissa()->getValor_obj();
-        
-        
 
-// em desenvolvimento
-
-
-        $aplicado = $this->arg->derivacao($this->arg->criarpremissa($this->arg->criardisjuncao($newpremissa1,$newpremissa2)));
-        $aplicado->setIdentificacao(($linha1+1).' vI');
-        
-
-
+        $aplicado = $this->arg->derivacao($this->arg->criarpremissa($this->arg->criardisjuncao($newpremissa1, $xml_entrada->getValor_obj())));
+       
         return $aplicado;
     }
 
@@ -67,6 +60,7 @@ class Regras extends Controller
     
             array_push($derivacao,$newpremissa1);
             array_push($derivacao,$newpremissa2);
+            
             return $derivacao;
         }
         return FALSE;
@@ -140,5 +134,6 @@ class Regras extends Controller
         }
         return FALSE;
     }
+
 
 }

@@ -207,7 +207,7 @@ class Argumento extends Controller
 
 
     public function derivacao($premissa){
-            return new Derivacao(null,$premissa,null);
+            return new Derivacao(null,$premissa,null, null);
     }
     public function criarpremissa($predicado){
         return new Premissa($predicado->getValor(), $predicado);

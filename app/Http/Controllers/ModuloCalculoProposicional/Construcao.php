@@ -13,24 +13,26 @@ class Construcao extends Controller
         $this->arg = new Argumento;
         $this->reg = new Regras;
     }
-    public function stringXmlDiretorio(){
-        $dir=dirname(__FILE__,4.).'\storage\app\public\formulas';
-           $diretorio = scandir($dir);
-           $num = count($diretorio) - 2;
-           $listaFormulas=[];
-           for($i=1; $i <= $num ; $i++){
-                $xml = simplexml_load_file($dir.'\formula-'.$i.'.xml');
-                $premissas = $this->arg->arrayPremissas($xml);
-                $conclusao = $this->arg->arrayConclusao($xml);
-                $formula = [
-                   'str'=>$this->arg->formula($premissas,$conclusao),
-                   'xml'=>$i
-                ];
-               array_push($listaFormulas,$formula);
-           }
-           return $listaFormulas;
-       }
+    // public function stringXmlDiretorio(){
+    //     $dir=dirname(__FILE__,4.).'\storage\app\public\formulas';
+    //        $diretorio = scandir($dir);
+    //        $num = count($diretorio) - 2;
+    //        $listaFormulas=[];
+    //        for($i=1; $i <= $num ; $i++){
+    //             $xml = simplexml_load_file($dir.'\formula-'.$i.'.xml');
+    //             $premissas = $this->arg->arrayPremissas($xml);
+    //             $conclusao = $this->arg->arrayConclusao($xml);
+    //             $formula = [
+    //                'str'=>$this->arg->formula($premissas,$conclusao),
+    //                'xml'=>$i
+    //             ];
+    //            array_push($listaFormulas,$formula);
+    //        }
+    //        return $listaFormulas;
+    //    }
 
+    
+    // Gera etapa de apresentação inicial
     public function gerar($derivacao,$premissas){
         $derivacoes=[];
         $indice=1;
@@ -46,9 +48,12 @@ class Construcao extends Controller
         return $derivacoes;
     }   
 
-    public function aplicarRegra($derivacoes,$linha1,$linha2,$regra){
+    public function aplicarRegra($derivacoes,$linha1,$linha2,$regra,$xml_entrada){
         $linha1=$linha1-1;
-        $linha2=$linha2-1;
+        if ($linha2 != null){
+            $linha2=$linha2-1;
+        }
+       
         
 // -----------------------------------------VERIFICAÇÃO DE INDICE POR TAMANHO DA LISTA ---------------------------
         if($linha1>=count($derivacoes)){
@@ -92,8 +97,17 @@ class Construcao extends Controller
         }
 
         elseif($regra=='Introducao_Disjuncao'){
-            $aplicado=$this->reg->IntroducaoDisjuncao($derivacoes,$derivacoes[$linha1],$linha2);
-            
+            if($xml_entrada == null){return FALSE;};
+
+            try{$xml= simplexml_load_string($xml_entrada);}
+            catch(\Exception $e){return response()->json(['success' => false, 'msg'=>'XML INVALIDO!', 'data'=>''],500);}
+            $obj_xml = $this->arg->arrayPremissas($xml);
+           
+            $aplicado=$this->reg->IntroducaoDisjuncao($derivacoes,$derivacoes[$linha1],$obj_xml[0]);
+
+            $aplicado->setIdentificacao(($linha1+1).' vI');
+
+
             array_push($derivacoes,$aplicado);
             return $derivacoes;
         }
@@ -143,8 +157,7 @@ class Construcao extends Controller
     public function gerarPasso($derivacao,$passo){
         if($passo!=[]){
             foreach ($passo as $i) {
-                print_r($i);
-                $derivacao= $this->aplicarRegra($derivacao,$i['entrada1'],$i['entrada2'],$i['regra']);
+                $derivacao= $this->aplicarRegra($derivacao,$i['entrada1'],$i['entrada2'],$i['regra'],$i['xml_entrada']);
             }
             return $derivacao;
         }

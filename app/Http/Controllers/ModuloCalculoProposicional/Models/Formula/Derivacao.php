@@ -9,11 +9,13 @@ class Derivacao
     protected $indice;
     protected $premissa;
     protected $identificacao;
+    protected $hipotese;
 
-    function __construct($indice,$premissa,$identificacao) {
+    function __construct($indice,$premissa,$identificacao, $hipotese) {
         $this->indice=$indice;
         $this->premissa=$premissa;
         $this->identificacao=$identificacao;
+        $this->hipotese=$hipotese;
     } 
 
     public function getIndice(){
@@ -40,4 +42,13 @@ class Derivacao
     public function setIdentificacao($identificacao){
         $this->identificacao=$identificacao;
     }
+
+    public function getHipotese(){
+        return $this->hipotese;
+    }
+    
+    public function setHipotese($hipotese){
+        $this->hipotese=$hipotese;
+    }
+
 }

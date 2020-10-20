@@ -57,6 +57,7 @@ class CalculoProposicionalController extends Controller
         #-----
         
 
+
         #--------------Mensagem----------------------
         $msg='';
 
@@ -80,12 +81,26 @@ class CalculoProposicionalController extends Controller
         $derivacaoPasso= $this->constr->gerarPasso($derivacao,$listaDerivacoes);
         #--------------------------------------------------------
         
+       
+        
+        
 
         #Deriva a tentativa atual, caso der erro, retorna valor boleano 
         if($formulario['entrada1']){
+          
+          
+            $derivacaofinal=$this->constr->aplicarRegra($derivacaoPasso,$formulario['entrada1'],$formulario['entrada2'],$formulario['regra'],$formulario['xml_entrada']);
+               
+            // dd($derivacaoPasso);
+            // else{
+                
+            //     $derivacaofinal=$this->constr->aplicarRegra($derivacaoPasso,$formulario['entrada1'],$formulario['entrada2'],null,$formulario['regra']);
+                
+            // }
 
+   
         }
-        $derivacaofinal=$this->constr->aplicarRegra($derivacaoPasso,$formulario['entrada1'],$formulario['entrada2'],$formulario['regra']);
+        
         if ($derivacaofinal != FALSE){
             if($this->constr->verificaConclusao($conclusao,$derivacaofinal)==TRUE){
                 $msg='True';
@@ -102,10 +117,12 @@ class CalculoProposicionalController extends Controller
         else{
             $derivacoes=$this->constr->gerar($derivacaofinal,$premissas);
             $formula=$this->arg->formula($premissas,$conclusao);
-            array_push( $listaDerivacoes, ['entrada1'=>$formulario['entrada1'],'entrada2'=>$formulario['entrada2'],'regra'=>$formulario['regra']]);
+           
+            array_push( $listaDerivacoes, ['entrada1'=>$formulario['entrada1'],'entrada2'=>$formulario['entrada2'],'regra'=>$formulario['regra'],'xml_entrada'=>$formulario['xml_entrada']]);
             $listaDerivacoes =json_encode ($listaDerivacoes);
+            
         }
-
+    
         return response()->json(['derivacoes'=>$derivacoes, 'formula'=>$formula, 'listaDerivacoes'=> $listaDerivacoes,'msg'=>$msg]);
 
     }
