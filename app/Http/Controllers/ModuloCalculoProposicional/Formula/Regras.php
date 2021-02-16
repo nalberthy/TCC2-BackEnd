@@ -113,16 +113,15 @@ class Regras extends Controller
         return FALSE;
     }
 
-    public function EliminacaoDisjuncao($derivacao, $premissa1, $premissa2, $premissa3, $linhas){
+    public function EliminacaoDisjuncao($derivacao, $premissa1, $premissa2, $premissa3){
         if ($premissa1->getPremissa()->getValor_obj()->getTipo()== 'DISJUNCAO'){
             if($premissa2->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL' && $premissa3->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL'){
                 if ($premissa2->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getEsquerda() || $premissa2->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getDireita()){
                     if ($premissa3->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getEsquerda() || $premissa3->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getDireita()){
                         if ($premissa2->getPremissa()->getValor_obj()->getDireita()==$premissa3->getPremissa()->getValor_obj()->getDireita()){
                             $newpremissa= $this->arg->derivacao($this->arg->criarpremissa(clone $premissa2->getPremissa()->getValor_obj()->getDireita()));
-                            $newpremissa->setIdentificacao(($linhas).' vE');
-                            array_push($derivacao,$newpremissa);
-                            return $derivacao;
+                            
+                            return $newpremissa;
                         }
                        return FALSE;
                     }
@@ -135,7 +134,16 @@ class Regras extends Controller
         return FALSE;
     }
 
-    
+    public function PC($derivacao, $xml_entrada){
+        
+
+    }
+
+    public function FinalizarPC($derivacao, $xml_entrada, $entrada1, $entrada2){
+
+        // cria condicional e adiciona em derivação
+
+    }
 
 
 }

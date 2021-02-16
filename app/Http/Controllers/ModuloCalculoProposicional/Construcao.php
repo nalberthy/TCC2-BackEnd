@@ -13,25 +13,7 @@ class Construcao extends Controller
         $this->arg = new Argumento;
         $this->reg = new Regras;
     }
-    // public function stringXmlDiretorio(){
-    //     $dir=dirname(__FILE__,4.).'\storage\app\public\formulas';
-    //        $diretorio = scandir($dir);
-    //        $num = count($diretorio) - 2;
-    //        $listaFormulas=[];
-    //        for($i=1; $i <= $num ; $i++){
-    //             $xml = simplexml_load_file($dir.'\formula-'.$i.'.xml');
-    //             $premissas = $this->arg->arrayPremissas($xml);
-    //             $conclusao = $this->arg->arrayConclusao($xml);
-    //             $formula = [
-    //                'str'=>$this->arg->formula($premissas,$conclusao),
-    //                'xml'=>$i
-    //             ];
-    //            array_push($listaFormulas,$formula);
-    //        }
-    //        return $listaFormulas;
-    //    }
 
-    
     // Gera etapa de apresentação inicial
     public function gerar($derivacao,$premissas){
         $derivacoes=[];
@@ -120,7 +102,11 @@ class Construcao extends Controller
             return $derivacoes;
         }
         elseif($regra=='Eliminacao_Disjuncao'){
-            // Disponibilizado em breve
+            $aplicado=$this->reg->EliminacaoDisjuncao($derivacoes,$derivacoes[$linha1],$derivacoes[$linha2],$derivacoes[$linha3]);
+            $aplicado->setIdentificacao(($linha1+1).','.($linha2+1).','.($linha3+1).' vE');
+         
+            array_push($derivacoes,$aplicado);
+            return $derivacoes;
         }
         elseif($regra=='Introducao_Conjuncao'){
             $aplicado=$this->reg->IntroducaoConjuncao($derivacoes,$derivacoes[$linha1],$derivacoes[$linha2]);
@@ -154,7 +140,13 @@ class Construcao extends Controller
             return $derivacoes;
         }
         elseif($regra=='PC'){
-             // Disponibilizado em breve
+            if($xml_entrada == null){return FALSE;};
+
+            try{$xml= simplexml_load_string($xml_entrada);}
+            catch(\Exception $e){return response()->json(['success' => false, 'msg'=>'XML INVALIDO!', 'data'=>''],500);}
+            $obj_xml = $this->arg->arrayPremissas($xml);
+           
+            
         }
         elseif($regra=='Raa'){
             // Disponibilizado em breve

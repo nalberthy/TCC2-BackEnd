@@ -73,7 +73,11 @@ class CalculoProposicionalController extends Controller
         $listaDerivacoes=$formulario['derivacoes'];
         $listaDerivacoes=json_decode($listaDerivacoes,true);
         #-------------------------------------
-        
+
+        #-------transforma o json em array----
+
+
+
         #-------- Reconstrói primeira etapa de derivação visual---------
         $derivacoes=$this->constr->gerar($derivacao,$premissas);
         #--------------------------------------------------------
@@ -89,14 +93,6 @@ class CalculoProposicionalController extends Controller
         if($formulario['entrada1']){
           
             $derivacaofinal=$this->constr->aplicarRegra($derivacaoPasso,$formulario['entrada1'],$formulario['entrada2'],$formulario['entrada3'],$formulario['regra'],$formulario['xml_entrada']);
-               
-            // dd($derivacaoPasso);
-            // else{
-                
-            //     $derivacaofinal=$this->constr->aplicarRegra($derivacaoPasso,$formulario['entrada1'],$formulario['entrada2'],null,$formulario['regra']);
-                
-            // }
-
    
         }
         
@@ -126,5 +122,10 @@ class CalculoProposicionalController extends Controller
 
     }
 
+    
+
+
 
 }
+
+
