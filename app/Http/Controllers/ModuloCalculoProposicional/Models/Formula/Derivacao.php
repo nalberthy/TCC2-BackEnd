@@ -4,19 +4,20 @@ namespace App\Http\Controllers\ModuloCalculoProposicional\Models\Formula;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Derivacao 
+class Derivacao
 {
     protected $indice;
     protected $premissa;
     protected $identificacao;
     protected $hipotese;
 
+
     function __construct($indice,$premissa,$identificacao, $hipotese) {
         $this->indice=$indice;
         $this->premissa=$premissa;
         $this->identificacao=$identificacao;
         $this->hipotese=$hipotese;
-    } 
+    }
 
     public function getIndice(){
         return $this->indice;
@@ -24,7 +25,7 @@ class Derivacao
 
     public function setIndice($indice){
         $this->indice=$indice;
-        
+
     }
 
     public function getPremissa(){
@@ -38,7 +39,7 @@ class Derivacao
     public function getIdentificacao(){
         return $this->identificacao;
     }
-    
+
     public function setIdentificacao($identificacao){
         $this->identificacao=$identificacao;
     }
@@ -46,7 +47,7 @@ class Derivacao
     public function getHipotese(){
         return $this->hipotese;
     }
-    
+
     public function setHipotese($hipotese){
         $this->hipotese=$hipotese;
     }
