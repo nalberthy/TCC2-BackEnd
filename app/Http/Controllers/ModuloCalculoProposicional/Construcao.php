@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\ModuloCalculoProposicional\Formula\Argumento;
 use App\Http\Controllers\ModuloCalculoProposicional\Formula\Regras;
 use App\Http\Controllers\Controller;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 
 class Construcao extends Controller
 {
@@ -23,36 +24,35 @@ class Construcao extends Controller
             if (in_array($i->getPremissa(), $premissas, true)){
                 $i->setIdentificacao('p');
             }
-            $derivacoes[]= ['indice'=>$indice,'str'=>$this->arg->stringArg($i->getPremissa()->getValor_obj()),'ident'=>$i->getIdentificacao()];
+            $derivacoes[]= ['indice'=>$indice,'str'=>$this->arg->stringArg($i->getPremissa()->getValor_obj()),'ident'=>$i->getIdentificacao(),'hip'=>$i->getHipotese()];
             $indice+=1;
         }
-        
+
         return $derivacoes;
-    }   
+    }
 
     public function aplicarRegra($derivacoes,$linha1,$linha2,$linha3,$regra,$xml_entrada){
         $linha1=$linha1-1;
-        
+
         if ($linha2 != null){
             $linha2=$linha2-1;
         }
         if ($linha3 != null){
             $linha3=$linha3-1;
         }
-       
-        
+
+
 // -----------------------------------------VERIFICAÇÃO DE INDICE POR TAMANHO DA LISTA ---------------------------
         if($linha1>=count($derivacoes)){
-            
             return False;
         }
- 
+
         if($linha2 >= count($derivacoes)){
-            
+
             return False;
         }
         if($linha3 >= count($derivacoes)){
-            
+
             return False;
         }
 // --------------------------------------------------------------------------------------------------------------
@@ -63,18 +63,41 @@ class Construcao extends Controller
             if ($linha2 == -1){return False;}
             if ($derivacoes[$linha1]->getPremissa()->getValor_obj()->getTipo()=="CONDICIONAL"){
                 if($derivacoes[$linha1]->getPremissa()->getValor_obj()->getEsquerdaValor()==$derivacoes[$linha2]->getPremissa()->getValor_obj()->getValor()){
-                    $aplicado= $this->reg->ModusPonens($derivacoes,$derivacoes[$linha1],$derivacoes[$linha2]);
+                    $aplicado= $this->reg->ModusPonens($derivacoes[$linha1],$derivacoes[$linha2]);
                     $aplicado->setIdentificacao(($linha1+1).','.($linha2+1).' mp');
+
+                    //--------------------------- Verificador de Hipotese------------------------
+                    // pega ultimo objeto de derivação e verifica o indice da hipotese
+                    $temp_hip= $derivacoes[count($derivacoes)-1]->getHipotese();
+
+                    // verifica se hipotese ja foi atribuida, se não seta valor do nivel 1, se sim realiza incremento no valor anterior
+
+                    if ($temp_hip!=null){
+                        $aplicado->setHipotese($temp_hip);
+                    }
+                    //-------------------
+
+
                     array_push($derivacoes,$aplicado);
                     return $derivacoes;
-                   
+
                 }
             }
-        
+
             elseif ($derivacoes[$linha2]->getPremissa()->getValor_obj()->getTipo()=="CONDICIONAL"){
                 if($derivacoes[$linha2]->getPremissa()->getValor_obj()->getEsquerdaValor()==$derivacoes[$linha1]->getPremissa()->getValor_obj()->getValor()){
-                    $aplicado=$this->reg->ModusPonens($derivacoes,$derivacoes[$linha1],$derivacoes[$linha2]); 
+                    $aplicado=$this->reg->ModusPonens($derivacoes[$linha1],$derivacoes[$linha2]);
                     $aplicado->setIdentificacao(($linha2+1).','.($linha1+1).' mp');
+                    //--------------------------- Verificador de Hipotese------------------------
+                    // pega ultimo objeto de derivação e verifica o indice da hipotese
+                    $temp_hip= $derivacoes[count($derivacoes)-1]->getHipotese();
+
+                    // verifica se hipotese ja foi atribuida, se não seta valor do nivel 1, se sim realiza incremento no valor anterior
+
+                    if ($temp_hip!=null){
+                        $aplicado->setHipotese($temp_hip);
+                    }
+                    //-------------------
                     array_push($derivacoes,$aplicado);
                     return $derivacoes;
                 }
@@ -92,26 +115,57 @@ class Construcao extends Controller
             try{$xml= simplexml_load_string($xml_entrada);}
             catch(\Exception $e){return response()->json(['success' => false, 'msg'=>'XML INVALIDO!', 'data'=>''],500);}
             $obj_xml = $this->arg->arrayPremissas($xml);
-           
-            $aplicado=$this->reg->IntroducaoDisjuncao($derivacoes,$derivacoes[$linha1],$obj_xml[0]);
+
+            $aplicado=$this->reg->IntroducaoDisjuncao($derivacoes[$linha1],$obj_xml[0]);
 
             $aplicado->setIdentificacao(($linha1+1).' vI');
 
+        //--------------------------- Verificador de Hipotese------------------------
+            // pega ultimo objeto de derivação e verifica o indice da hipotese
+            $temp_hip= $derivacoes[count($derivacoes)-1]->getHipotese();
+
+            // verifica se hipotese ja foi atribuida, se não seta valor do nivel 1, se sim realiza incremento no valor anterior
+
+            if ($temp_hip!=null){
+                $aplicado->setHipotese($temp_hip);
+            }
+            //-------------------
 
             array_push($derivacoes,$aplicado);
             return $derivacoes;
         }
         elseif($regra=='Eliminacao_Disjuncao'){
-            $aplicado=$this->reg->EliminacaoDisjuncao($derivacoes,$derivacoes[$linha1],$derivacoes[$linha2],$derivacoes[$linha3]);
+            $aplicado=$this->reg->EliminacaoDisjuncao($derivacoes[$linha1],$derivacoes[$linha2],$derivacoes[$linha3]);
             $aplicado->setIdentificacao(($linha1+1).','.($linha2+1).','.($linha3+1).' vE');
-         
+
+            //--------------------------- Verificador de Hipotese------------------------
+            // pega ultimo objeto de derivação e verifica o indice da hipotese
+            $temp_hip= $derivacoes[count($derivacoes)-1]->getHipotese();
+
+            // verifica se hipotese ja foi atribuida, se não seta valor do nivel 1, se sim realiza incremento no valor anterior
+
+            if ($temp_hip!=null){
+                $aplicado->setHipotese($temp_hip);
+            }
+            //-------------------
+
             array_push($derivacoes,$aplicado);
             return $derivacoes;
         }
         elseif($regra=='Introducao_Conjuncao'){
-            $aplicado=$this->reg->IntroducaoConjuncao($derivacoes,$derivacoes[$linha1],$derivacoes[$linha2]);
+            $aplicado=$this->reg->IntroducaoConjuncao($derivacoes[$linha1],$derivacoes[$linha2]);
             $aplicado->setIdentificacao(($linha1+1).','.($linha2+1).' ^I');
 
+            //--------------------------- Verificador de Hipotese------------------------
+            // pega ultimo objeto de derivação e verifica o indice da hipotese
+            $temp_hip= $derivacoes[count($derivacoes)-1]->getHipotese();
+
+            // verifica se hipotese ja foi atribuida, se não seta valor do nivel 1, se sim realiza incremento no valor anterior
+
+            if ($temp_hip!=null){
+                $aplicado->setHipotese($temp_hip);
+            }
+            //-------------------
             array_push($derivacoes,$aplicado);
             return $derivacoes;
         }
@@ -126,34 +180,56 @@ class Construcao extends Controller
         }
         elseif($regra=='Introducao_Bicondicional'){
             if($derivacoes[$linha1]->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL' and $derivacoes[$linha2]->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL'){
-                $aplicado=$this->reg->IntroducaoBicondicional($derivacoes,$derivacoes[$linha1],$derivacoes[$linha2]);
+                $aplicado=$this->reg->IntroducaoBicondicional($derivacoes[$linha1],$derivacoes[$linha2]);
 
                 $aplicado->setIdentificacao(($linha1+1).','.($linha2+1).' ↔I');
                 array_push($derivacoes,$aplicado);
                 return $derivacoes;
             }
             return FALSE;
-            
+
         }
         elseif($regra=='Eliminacao_Bicondicional'){
-            $derivacoes= $this->reg->EliminacaoBicondicional($derivacoes,$derivacoes[$linha1],$linha1);
-            return $derivacoes;
+            $aplicado= $this->reg->EliminacaoBicondicional($derivacoes,$derivacoes[$linha1],$linha1);
+            return $aplicado;
         }
-        elseif($regra=='PC'){
+
+        elseif($regra=='Hipotese_PC'){
             if($xml_entrada == null){return FALSE;};
 
             try{$xml= simplexml_load_string($xml_entrada);}
             catch(\Exception $e){return response()->json(['success' => false, 'msg'=>'XML INVALIDO!', 'data'=>''],500);}
-            $obj_xml = $this->arg->arrayPremissas($xml);
-           
-            
+
+
+            $obj_xml = $this->arg->arrayPremissas($xml)[0];
+            $aplicado = $this->reg->PC($obj_xml);
+
+            $aplicado->setIdentificacao('Hip_PC');
+            // pega ultimo objeto de derivação e verifica o indice da hipotese
+            $temp_hip= $derivacoes[count($derivacoes)-1]->getHipotese();
+
+           // verifica se hipotese ja foi atribuida, se não seta valor do nivel 1, se sim realiza incremento no valor anterior
+
+            if ($temp_hip == null){
+                $aplicado->setHipotese('1');
+            }
+            elseif ($temp_hip!=null){
+                $aplicado->setHipotese(strval(intval($temp_hip)+1));
+            }
+
+            array_push($derivacoes,$aplicado);
+
+
+            return $derivacoes;
+
+
         }
         elseif($regra=='Raa'){
             // Disponibilizado em breve
        }
     }
 
-    #reconstrói objeto a partir de array com regras aplicadas anteriormente 
+    #reconstrói objeto a partir de array com regras aplicadas anteriormente
     public function gerarPasso($derivacao,$passo){
         if($passo!=[]){
             foreach ($passo as $i) {
@@ -164,9 +240,9 @@ class Construcao extends Controller
         else{
             return $derivacao;
         }
-        
-    }  
-    
+
+    }
+
 
     public function verificaConclusao($conclusao,$derivacao){
 
@@ -175,7 +251,7 @@ class Construcao extends Controller
                 return TRUE;
             }
         }
-        
+
     }
-    
+
 }

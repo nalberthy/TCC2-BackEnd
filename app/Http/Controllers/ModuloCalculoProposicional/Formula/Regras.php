@@ -13,7 +13,7 @@ class Regras extends Controller
         $this->arg = new Argumento;
     }
 
-    public function ModusPonens($derivacao,$premissa1,$premissa2){
+    public function ModusPonens($premissa1,$premissa2){
         $newpremissa1 = clone $premissa1->getPremissa()->getValor_obj();
         $newpremissa2 = clone $premissa2->getPremissa()->getValor_obj();
 
@@ -33,19 +33,19 @@ class Regras extends Controller
         }
     }
 
-    public function IntroducaoDisjuncao($derivacao,$premissa1, $xml_entrada){
-       
+    public function IntroducaoDisjuncao($premissa1, $xml_entrada){
+
         $newpremissa1 = clone $premissa1->getPremissa()->getValor_obj();
 
         $aplicado = $this->arg->derivacao($this->arg->criarpremissa($this->arg->criardisjuncao($newpremissa1, $xml_entrada->getValor_obj())));
-       
+
         return $aplicado;
     }
 
-    public function IntroducaoConjuncao($derivacao,$premissa1,$premissa2){
+    public function IntroducaoConjuncao($premissa1,$premissa2){
         $newpremissa1 = clone $premissa1->getPremissa()->getValor_obj();
         $newpremissa2 = clone $premissa2->getPremissa()->getValor_obj();
-        
+
         return $this->arg->derivacao($this->arg->criarpremissa($this->arg->criarconjuncao($newpremissa1,$newpremissa2)));
     }
 
@@ -54,13 +54,24 @@ class Regras extends Controller
             $newpremissa= clone $premissa->getPremissa()->getValor_obj();
             $newpremissa1= $this->arg->derivacao($this->arg->criarpremissa($newpremissa->getEsquerda()));
             $newpremissa1->setIdentificacao(($linha+1).' ^E');
-    
+
             $newpremissa2=$this->arg->derivacao($this->arg->criarpremissa($newpremissa->getDireita()));
             $newpremissa2->setIdentificacao(($linha+1).' ^E');
-    
+
+            //--------------------------- Verificador de Hipotese------------------------
+            // pega ultimo objeto de derivação e verifica o indice da hipotese
+            $temp_hip= $derivacao[count($derivacao)-1]->getHipotese();
+
+            // verifica se hipotese ja foi atribuida, se não seta valor do nivel 1, se sim realiza incremento no valor anterior
+
+            if ($temp_hip!=null){
+                $newpremissa1->setHipotese($temp_hip);
+                $newpremissa2->setHipotese($temp_hip);
+            }
+            //-------------------
             array_push($derivacao,$newpremissa1);
             array_push($derivacao,$newpremissa2);
-            
+
             return $derivacao;
         }
         return FALSE;
@@ -72,18 +83,28 @@ class Regras extends Controller
             $newpredicado->eliminacaoNegacao();
             $newpredicado=$this->arg->derivacao($this->arg->criarpremissa($newpredicado));
             $newpredicado->setIdentificacao(($linha+1).' ~E');
-            
+
+            //--------------------------- Verificador de Hipotese------------------------
+            // pega ultimo objeto de derivação e verifica o indice da hipotese
+            $temp_hip= $derivacao[count($derivacao)-1]->getHipotese();
+
+            // verifica se hipotese ja foi atribuida, se não seta valor do nivel 1, se sim realiza incremento no valor anterior
+
+            if ($temp_hip!=null){
+                $newpredicado->setHipotese($temp_hip);
+            }
+            //-------------------
             array_push($derivacao,$newpredicado);
-    
+
             return $derivacao;
         }
         return FALSE;
     }
 
-    public function IntroducaoBicondicional($derivacao,$premissa1,$premissa2){
+    public function IntroducaoBicondicional($premissa1,$premissa2){
         $newpremissa1 = clone $premissa1->getPremissa()->getValor_obj();
         $newpremissa2 = clone $premissa2->getPremissa()->getValor_obj();
-  
+
         if($newpremissa1->getEsquerda()->getValor()==$newpremissa2->getDireita()->getValor()){
             if($newpremissa1->getEsquerda()->getNegado()==$newpremissa2->getDireita()->getNegado()){
                 if($newpremissa1->getDireita()->getValor()==$newpremissa2->getEsquerda()->getValor()){
@@ -91,21 +112,34 @@ class Regras extends Controller
                         return $this->arg->derivacao($this->arg->criarpremissa($this->arg->criarbicondicional($newpremissa1->getEsquerda(),$newpremissa2->getEsquerda())));
                     }
                 }
-            }  
+            }
         }
         return FALSE;
     }
 
-        
+
     public function EliminacaoBicondicional($derivacao,$premissa,$linha){
         if($premissa->getPremissa()->getValor_obj()->getTipo()=='BICONDICIONAL'){
             $esquerda = clone $premissa->getPremissa()->getValor_obj()->getEsquerda();
             $direita = clone $premissa->getPremissa()->getValor_obj()->getDireita();
             $newpremissa1=$this->arg->derivacao($this->arg->criarpremissa($this->arg->criarcondicional($direita,$esquerda)));
             $newpremissa2=$this->arg->derivacao($this->arg->criarpremissa($this->arg->criarcondicional($esquerda,$direita)));
-    
+
             $newpremissa1->setIdentificacao(($linha+1).' ↔E');
             $newpremissa2->setIdentificacao(($linha+1).' ↔E');
+
+            //--------------------------- Verificador de Hipotese------------------------
+            // pega ultimo objeto de derivação e verifica o indice da hipotese
+            $temp_hip= $derivacao[count($derivacao)-1]->getHipotese();
+
+            // verifica se hipotese ja foi atribuida, se não seta valor do nivel 1, se sim realiza incremento no valor anterior
+
+            if ($temp_hip!=null){
+                $newpremissa1->setHipotese($temp_hip);
+                $newpremissa2->setHipotese($temp_hip);
+            }
+            //-------------------
+
             array_push($derivacao,$newpremissa1);
             array_push($derivacao,$newpremissa2);
             return $derivacao;
@@ -113,14 +147,14 @@ class Regras extends Controller
         return FALSE;
     }
 
-    public function EliminacaoDisjuncao($derivacao, $premissa1, $premissa2, $premissa3){
+    public function EliminacaoDisjuncao($premissa1, $premissa2, $premissa3){
         if ($premissa1->getPremissa()->getValor_obj()->getTipo()== 'DISJUNCAO'){
             if($premissa2->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL' && $premissa3->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL'){
                 if ($premissa2->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getEsquerda() || $premissa2->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getDireita()){
                     if ($premissa3->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getEsquerda() || $premissa3->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getDireita()){
                         if ($premissa2->getPremissa()->getValor_obj()->getDireita()==$premissa3->getPremissa()->getValor_obj()->getDireita()){
                             $newpremissa= $this->arg->derivacao($this->arg->criarpremissa(clone $premissa2->getPremissa()->getValor_obj()->getDireita()));
-                            
+
                             return $newpremissa;
                         }
                        return FALSE;
@@ -134,14 +168,15 @@ class Regras extends Controller
         return FALSE;
     }
 
-    public function PC($derivacao, $xml_entrada){
-        
+    public function PC($xml_entrada){
+
+        return $this->arg->derivacao($xml_entrada);
 
     }
 
     public function FinalizarPC($derivacao, $xml_entrada, $entrada1, $entrada2){
 
-        // cria condicional e adiciona em derivação
+
 
     }
 
