@@ -221,9 +221,26 @@ class Construcao extends Controller
 
 
             return $derivacoes;
-
-
         }
+
+        elseif($regra=='Finish_Hip'){
+
+            // verifica tipo de regra hipotetica
+            if($derivacoes[$linha1]->getIdentificacao()=="Hip_PC"){
+                // aplica regra de pc - basicamente cria um condicional
+                $aplicado = $this->reg->FinalizarHipPC($derivacoes[$linha1],$derivacoes[$linha2]);
+                $aplicado->setIdentificacao(($linha1+1).'-'.($linha2+1).' Hip-PC');
+                if($derivacoes[$linha1]->getHipotese()==1){
+                    $aplicado->setHipotese(null);
+                }
+                else{
+                    $aplicado->setHipotese(strval(intval($derivacoes[$linha1]->getHipotese())-1));
+                }
+                array_push($derivacoes,$aplicado);
+                return $derivacoes;
+            }
+        }
+
         elseif($regra=='Raa'){
             // Disponibilizado em breve
        }

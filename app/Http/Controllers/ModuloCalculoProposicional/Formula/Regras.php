@@ -174,9 +174,11 @@ class Regras extends Controller
 
     }
 
-    public function FinalizarPC($derivacao, $xml_entrada, $entrada1, $entrada2){
 
-
+    public function FinalizarHipPC($premissa1, $premissa2){
+        $newpremissa1 = clone $premissa1->getPremissa()->getValor_obj();
+        $newpremissa2 = clone $premissa2->getPremissa()->getValor_obj();
+        return $this->arg->derivacao($this->arg->criarpremissa($this->arg->criarcondicional($newpremissa1,$newpremissa2)));
 
     }
 
