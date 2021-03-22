@@ -31,7 +31,7 @@ class Construcao extends Controller
         return $derivacoes;
     }
 
-    public function aplicarRegra($derivacoes,$linha1,$linha2,$linha3,$regra,$xml_entrada){
+    public function aplicarRegra($derivacoes,$linha1,$linha2,$linha3,$regra,$xml_entrada,$conclusao){
         $linha1=$linha1-1;
 
         if ($linha2 != null){
@@ -216,24 +216,78 @@ class Construcao extends Controller
             elseif ($temp_hip!=null){
                 $aplicado->setHipotese(strval(intval($temp_hip)+1));
             }
-
             array_push($derivacoes,$aplicado);
 
+            return $derivacoes;
+        }
+
+        elseif($regra=='Hipotese_Raa'){
+            $aplicado = $this->reg->RAA($conclusao[0]->getValor_obj());
+
+            $aplicado->setIdentificacao('Hip_Raa');
+
+            // pega ultimo objeto de derivação e verifica o indice da hipotese
+            $temp_hip= $derivacoes[count($derivacoes)-1]->getHipotese();
+
+           // verifica se hipotese ja foi atribuida, se não seta valor do nivel 1, se sim realiza incremento no valor anterior
+
+            if ($temp_hip == null){
+                $aplicado->setHipotese('1');
+            }
+            elseif ($temp_hip!=null){
+                $aplicado->setHipotese(strval(intval($temp_hip)+1));
+            }
+            array_push($derivacoes,$aplicado);
 
             return $derivacoes;
+       }
+
+        elseif($regra=='Finish_Hip'){
+            // verifica tipo de regra hipotetica
+            if($derivacoes[$linha1]->getIdentificacao()=="Hip_PC"){
+                if($derivacoes[$linha1]->getHipotese()==$derivacoes[$linha2]->getHipotese()){
+                    // aplica regra de pc - basicamente cria um condicional
+                    $aplicado = $this->reg->FinalizarHipPC($derivacoes[$linha1],$derivacoes[$linha2]);
+                    $aplicado->setIdentificacao(($linha1+1).'-'.($linha2+1).' Hip-PC');
+                    if($derivacoes[$linha1]->getHipotese()==1){
+                        $aplicado->setHipotese(null);
+                    }
+                    else{
+                        $aplicado->setHipotese(strval(intval($derivacoes[$linha1]->getHipotese())-1));
+                    }
+                    array_push($derivacoes,$aplicado);
+                    return $derivacoes;
+                }
+            }
+
+            elseif($derivacoes[$linha1]->getIdentificacao()=="Hip_Raa"){
+                if($derivacoes[$linha1]->getHipotese()==$derivacoes[$linha2]->getHipotese()){
+                    $aplicado = $this->reg->FinalizarHipRAA($derivacoes[$linha2], $conclusao[0]);
+
+                    $aplicado->setIdentificacao(($linha1+1).'-'.($linha2+1).' Hip-RAA');
+
+                    if($derivacoes[$linha1]->getHipotese()==1){
+                        $aplicado->setHipotese(null);
+                    }
+                    else{
+                        $aplicado->setHipotese(strval(intval($derivacoes[$linha1]->getHipotese())-1));
+                    }
+                    array_push($derivacoes,$aplicado);
+                    return $derivacoes;
+                }
+            }
+
 
 
         }
-        elseif($regra=='Raa'){
-            // Disponibilizado em breve
-       }
+
     }
 
     #reconstrói objeto a partir de array com regras aplicadas anteriormente
-    public function gerarPasso($derivacao,$passo){
+    public function gerarPasso($derivacao,$passo,$conclusao){
         if($passo!=[]){
             foreach ($passo as $i) {
-                $derivacao= $this->aplicarRegra($derivacao,$i['entrada1'],$i['entrada2'],$i['entrada3'],$i['regra'],$i['xml_entrada']);
+                $derivacao= $this->aplicarRegra($derivacao,$i['entrada1'],$i['entrada2'],$i['entrada3'],$i['regra'],$i['xml_entrada'],$conclusao);
             }
             return $derivacao;
         }
@@ -245,7 +299,7 @@ class Construcao extends Controller
 
 
     public function verificaConclusao($conclusao,$derivacao){
-
+        // percorre lista de derivação e verifica as conclusões
         foreach ($derivacao as $i){
             if($this->arg->stringArg($conclusao[0]->getValor_obj())==$this->arg->stringArg($i->getPremissa()->getValor_obj())){
                 return TRUE;

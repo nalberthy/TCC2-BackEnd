@@ -20,7 +20,6 @@ class CalculoProposicionalController extends Controller
 
 
     public function Derivacao(Request $request){
-        print_r($request->xml);
         try{
             $xml = simplexml_load_string($request->xml);
         }
@@ -42,6 +41,7 @@ class CalculoProposicionalController extends Controller
         $formula=$this->arg->formula($premissas,$conclusao);
         # array de objeto derivações
         $derivacoes=$this->constr->gerar($derivacao,$premissas);
+
 
         return response()->json(['derivacoes'=>$derivacoes, 'formula'=>$formula, 'listaDerivacoes'=>$listaDerivacoes, 'msg'=>'' ]);
         // return view('derivacao',['derivacoes'=>$derivacoes,'listaFormulas'=> $listaFormulas, 'formula'=>$formula, 'idXml'=>$id, 'listaDerivacoes'=>$listaDerivacoes, 'msg'=>'' ]);
@@ -81,7 +81,7 @@ class CalculoProposicionalController extends Controller
         $derivacoes=$this->constr->gerar($derivacao,$premissas);
         #--------------------------------------------------------
         #-------- Reconstró passo a passo -----------------------
-        $derivacaoPasso= $this->constr->gerarPasso($derivacao,$listaDerivacoes);
+        $derivacaoPasso= $this->constr->gerarPasso($derivacao,$listaDerivacoes,$conclusao);
         #--------------------------------------------------------
 
 
@@ -89,9 +89,9 @@ class CalculoProposicionalController extends Controller
 
 
         #Deriva a tentativa atual, caso der erro, retorna valor boleano
-        if($formulario['entrada1'] or $formulario['regra']=="Hipotese_PC"){
+        if($formulario['entrada1'] or $formulario['regra']=="Hipotese_PC" or $formulario['regra']=="Hipotese_Raa"){
 
-            $derivacaofinal=$this->constr->aplicarRegra($derivacaoPasso,$formulario['entrada1'],$formulario['entrada2'],$formulario['entrada3'],$formulario['regra'],$formulario['xml_entrada']);
+            $derivacaofinal=$this->constr->aplicarRegra($derivacaoPasso,$formulario['entrada1'],$formulario['entrada2'],$formulario['entrada3'],$formulario['regra'],$formulario['xml_entrada'], $conclusao);
 
         }
 

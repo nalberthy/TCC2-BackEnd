@@ -310,7 +310,7 @@ class Argumento extends Controller
             }
             else{$strpremissa=$strpremissa.$this->stringArg($premissas[$i]->getValor_obj()).' '; }
         }
-        
+
         $strconclusao=$strconclusao.$this->stringArg($conclusao[0]->getValor_obj());
         $strFomula=$strFomula.$strpremissa.'|-'.$strconclusao;
         return $strFomula;
