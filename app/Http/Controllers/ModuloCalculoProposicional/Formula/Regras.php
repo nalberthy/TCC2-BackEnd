@@ -174,6 +174,13 @@ class Regras extends Controller
 
     }
 
+    public function RAA($conclusao){
+        $new_conclusao = clone $conclusao;
+        $new_conclusao->setNegado(1);
+        return $this->arg->derivacao($this->arg->criarpremissa($new_conclusao));
+
+    }
+
 
     public function FinalizarHipPC($premissa1, $premissa2){
         $newpremissa1 = clone $premissa1->getPremissa()->getValor_obj();
@@ -182,5 +189,28 @@ class Regras extends Controller
 
     }
 
+    public function FinalizarHipRAA($contradicao,$conclusao){
+        if($contradicao->getPremissa()->getValor_obj()->getTipo()== 'CONJUNCAO'){
+            $newpremissa= clone $contradicao->getPremissa()->getValor_obj();
+
+            $newpremissa1= $this->arg->derivacao($this->arg->criarpremissa($newpremissa->getEsquerda()));
+            $newpremissa2=$this->arg->derivacao($this->arg->criarpremissa($newpremissa->getDireita()));
+
+            $new_conclusao = clone $conclusao;
+
+            if($newpremissa1->getPremissa()->getValor_str()==$newpremissa2->getPremissa()->getValor_str()){
+                // print_r($newpremissa1->getPremissa()->getValor_Obj()->getNegado());
+                if($newpremissa1->getPremissa()->getValor_Obj()->getNegado()!=$newpremissa2->getPremissa()->getValor_Obj()->getNegado()){
+
+                    return $this->arg->derivacao($new_conclusao);
+                }
+                return false;
+            };
+            return false;
+        }
+    return false;
+
+
+    }
 
 }
