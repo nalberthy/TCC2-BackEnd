@@ -23,8 +23,8 @@ Route::post('auth/login', 'Api\AuthController@login');
 Route::get('auth/me', 'Api\AuthController@me');
 Route::get('users', 'Api\UserController@index');
 
-Route::get('derivacao/teste', 'Api\CalculoProposicionalController@Teste');
-Route::post('derivacao/inicializacao', 'Api\CalculoProposicionalController@Derivacao');
+// Route::get('derivacao/teste', 'Api\CalculoProposicionalController@Teste');
+Route::post('derivacao/inicializar', 'Api\CalculoProposicionalController@Derivacao');
 Route::post('derivacao/derivar', 'Api\CalculoProposicionalController@Derivar');
 
 Route::group(['middleware'=>['apiJwt']],function(){
