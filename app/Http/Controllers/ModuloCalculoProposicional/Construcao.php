@@ -222,24 +222,33 @@ class Construcao extends Controller
         }
 
         elseif($regra=='Hipotese_Raa'){
-            $aplicado = $this->reg->RAA($conclusao[0]->getValor_obj());
+            if($xml_entrada == null){return FALSE;};
 
-            $aplicado->setIdentificacao('Hip_Raa');
+            try{$xml= simplexml_load_string($xml_entrada);}
+            catch(\Exception $e){return response()->json(['success' => false, 'msg'=>'XML INVALIDO!', 'data'=>''],500);}
 
-            // pega ultimo objeto de derivação e verifica o indice da hipotese
-            $temp_hip= $derivacoes[count($derivacoes)-1]->getHipotese();
 
-           // verifica se hipotese ja foi atribuida, se não seta valor do nivel 1, se sim realiza incremento no valor anterior
+            $obj_xml = $this->arg->arrayPremissas($xml)[0];
+            $aplicado = $this->reg->RAA($conclusao[0]->getValor_obj(),$obj_xml);
+            if($aplicado){
+                $aplicado->setIdentificacao('Hip_Raa');
 
-            if ($temp_hip == null){
-                $aplicado->setHipotese('1');
+                // pega ultimo objeto de derivação e verifica o indice da hipotese
+                $temp_hip= $derivacoes[count($derivacoes)-1]->getHipotese();
+    
+               // verifica se hipotese ja foi atribuida, se não seta valor do nivel 1, se sim realiza incremento no valor anterior
+    
+                if ($temp_hip == null){
+                    $aplicado->setHipotese('1');
+                }
+                elseif ($temp_hip!=null){
+                    $aplicado->setHipotese(strval(intval($temp_hip)+1));
+                }
+                array_push($derivacoes,$aplicado);
+    
+                return $derivacoes;
             }
-            elseif ($temp_hip!=null){
-                $aplicado->setHipotese(strval(intval($temp_hip)+1));
-            }
-            array_push($derivacoes,$aplicado);
-
-            return $derivacoes;
+           
        }
 
         elseif($regra=='Finish_Hip'){
