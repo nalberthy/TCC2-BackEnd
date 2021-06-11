@@ -148,13 +148,17 @@ class Regras extends Controller
     }
 
     public function EliminacaoDisjuncao($premissa1, $premissa2, $premissa3){
+        // verifica se é do tipo conjunção
         if ($premissa1->getPremissa()->getValor_obj()->getTipo()== 'DISJUNCAO'){
+            // verifica se os valores passados são do tipo condicional
             if($premissa2->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL' && $premissa3->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL'){
+                // faz comparativo entre valor antecedente do condicional verificando se esta contido na disjuncao
                 if ($premissa2->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getEsquerda() || $premissa2->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getDireita()){
+                    // faz comparativo entre valor antecedente do condicional verificando se esta contido na disjuncao
                     if ($premissa3->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getEsquerda() || $premissa3->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getDireita()){
+                        // verifica se o valor do consequente dos dois condicionais passados são iguais
                         if ($premissa2->getPremissa()->getValor_obj()->getDireita()==$premissa3->getPremissa()->getValor_obj()->getDireita()){
                             $newpremissa= $this->arg->derivacao($this->arg->criarpremissa(clone $premissa2->getPremissa()->getValor_obj()->getDireita()));
-
                             return $newpremissa;
                         }
                        return FALSE;
@@ -165,7 +169,26 @@ class Regras extends Controller
             }
             return FALSE;
         }
+            // verifica se os valores passados são do tipo condicional
+        if($premissa1->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL' && $premissa2->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL'){
+            // faz comparativo entre valor antecedente do condicional verificando se esta contido na disjuncao
+            if ($premissa1->getPremissa()->getValor_obj()->getEsquerda() == $premissa3->getPremissa()->getValor_obj()->getEsquerda() || $premissa1->getPremissa()->getValor_obj()->getEsquerda() == $premissa3->getPremissa()->getValor_obj()->getDireita()){
+                // faz comparativo entre valor antecedente do condicional verificando se esta contido na disjuncao
+                if ($premissa2->getPremissa()->getValor_obj()->getEsquerda() == $premissa3->getPremissa()->getValor_obj()->getEsquerda() || $premissa2->getPremissa()->getValor_obj()->getEsquerda() == $premissa3->getPremissa()->getValor_obj()->getDireita()){
+                    // verifica se o valor do consequente dos dois condicionais passados são iguais
+                    if ($premissa1->getPremissa()->getValor_obj()->getDireita()==$premissa2->getPremissa()->getValor_obj()->getDireita()){
+                        $newpremissa= $this->arg->derivacao($this->arg->criarpremissa(clone $premissa1->getPremissa()->getValor_obj()->getDireita()));
+                        return $newpremissa;
+                    }
+                    return FALSE;
+                }
+                return FALSE;
+            }
+            return FALSE;
+        }
         return FALSE;
+        
+ 
     }
 
     public function PC($xml_entrada){
@@ -174,10 +197,24 @@ class Regras extends Controller
 
     }
 
-    public function RAA($conclusao){
+    public function RAA($conclusao, $xml_entrada){
         $new_conclusao = clone $conclusao;
-        $new_conclusao->setNegado(1);
-        return $this->arg->derivacao($this->arg->criarpremissa($new_conclusao));
+        if($new_conclusao->getNegado()!=0){
+            $new_conclusao->setNegado($new_conclusao->getNegado()+1);
+        }
+        else{$new_conclusao->setNegado(1);}
+
+        $new_conclusao1 = $this->arg->criarpremissa($new_conclusao);
+
+        if($new_conclusao1->getValor_str() == $xml_entrada->getValor_str()){
+            if($new_conclusao1->getValor_obj()->getNegado()==$xml_entrada->getValor_obj()->getNegado() ){
+                return $this->arg->derivacao($xml_entrada);
+            }
+            // negações diferentes
+            return FALSE;
+        }
+        // valor de string diferentes
+        return FALSE;
 
     }
 
@@ -186,7 +223,6 @@ class Regras extends Controller
         $newpremissa1 = clone $premissa1->getPremissa()->getValor_obj();
         $newpremissa2 = clone $premissa2->getPremissa()->getValor_obj();
         return $this->arg->derivacao($this->arg->criarpremissa($this->arg->criarcondicional($newpremissa1,$newpremissa2)));
-
     }
 
     public function FinalizarHipRAA($contradicao,$conclusao){
@@ -200,10 +236,10 @@ class Regras extends Controller
 
             if($newpremissa1->getPremissa()->getValor_str()==$newpremissa2->getPremissa()->getValor_str()){
                 // print_r($newpremissa1->getPremissa()->getValor_Obj()->getNegado());
-                if($newpremissa1->getPremissa()->getValor_Obj()->getNegado()!=$newpremissa2->getPremissa()->getValor_Obj()->getNegado()){
-
+                if(($newpremissa1->getPremissa()->getValor_Obj()->getNegado()-$newpremissa2->getPremissa()->getValor_Obj()->getNegado())==1 || ($newpremissa1->getPremissa()->getValor_Obj()->getNegado()-$newpremissa2->getPremissa()->getValor_Obj()->getNegado())==-1 ){
                     return $this->arg->derivacao($new_conclusao);
                 }
+
                 return false;
             };
             return false;

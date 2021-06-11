@@ -94,7 +94,7 @@ class CalculoProposicionalController extends Controller
             $derivacaofinal=$this->constr->aplicarRegra($derivacaoPasso,$formulario['entrada1'],$formulario['entrada2'],$formulario['entrada3'],$formulario['regra'],$formulario['xml_entrada'], $conclusao);
 
         }
-
+ 
         if ($derivacaofinal != FALSE){
             if($this->constr->verificaConclusao($conclusao,$derivacaofinal)==TRUE){
                 $msg='True';
