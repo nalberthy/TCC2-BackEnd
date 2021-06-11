@@ -148,13 +148,17 @@ class Regras extends Controller
     }
 
     public function EliminacaoDisjuncao($premissa1, $premissa2, $premissa3){
+        // verifica se é do tipo conjunção
         if ($premissa1->getPremissa()->getValor_obj()->getTipo()== 'DISJUNCAO'){
+            // verifica se os valores passados são do tipo condicional
             if($premissa2->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL' && $premissa3->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL'){
+                // faz comparativo entre valor antecedente do condicional verificando se esta contido na disjuncao
                 if ($premissa2->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getEsquerda() || $premissa2->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getDireita()){
+                    // faz comparativo entre valor antecedente do condicional verificando se esta contido na disjuncao
                     if ($premissa3->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getEsquerda() || $premissa3->getPremissa()->getValor_obj()->getEsquerda() == $premissa1->getPremissa()->getValor_obj()->getDireita()){
+                        // verifica se o valor do consequente dos dois condicionais passados são iguais
                         if ($premissa2->getPremissa()->getValor_obj()->getDireita()==$premissa3->getPremissa()->getValor_obj()->getDireita()){
                             $newpremissa= $this->arg->derivacao($this->arg->criarpremissa(clone $premissa2->getPremissa()->getValor_obj()->getDireita()));
-
                             return $newpremissa;
                         }
                        return FALSE;
@@ -165,7 +169,26 @@ class Regras extends Controller
             }
             return FALSE;
         }
+            // verifica se os valores passados são do tipo condicional
+        if($premissa1->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL' && $premissa2->getPremissa()->getValor_obj()->getTipo()=='CONDICIONAL'){
+            // faz comparativo entre valor antecedente do condicional verificando se esta contido na disjuncao
+            if ($premissa1->getPremissa()->getValor_obj()->getEsquerda() == $premissa3->getPremissa()->getValor_obj()->getEsquerda() || $premissa1->getPremissa()->getValor_obj()->getEsquerda() == $premissa3->getPremissa()->getValor_obj()->getDireita()){
+                // faz comparativo entre valor antecedente do condicional verificando se esta contido na disjuncao
+                if ($premissa2->getPremissa()->getValor_obj()->getEsquerda() == $premissa3->getPremissa()->getValor_obj()->getEsquerda() || $premissa2->getPremissa()->getValor_obj()->getEsquerda() == $premissa3->getPremissa()->getValor_obj()->getDireita()){
+                    // verifica se o valor do consequente dos dois condicionais passados são iguais
+                    if ($premissa1->getPremissa()->getValor_obj()->getDireita()==$premissa2->getPremissa()->getValor_obj()->getDireita()){
+                        $newpremissa= $this->arg->derivacao($this->arg->criarpremissa(clone $premissa1->getPremissa()->getValor_obj()->getDireita()));
+                        return $newpremissa;
+                    }
+                    return FALSE;
+                }
+                return FALSE;
+            }
+            return FALSE;
+        }
         return FALSE;
+        
+ 
     }
 
     public function PC($xml_entrada){
