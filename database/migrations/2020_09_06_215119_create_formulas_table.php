@@ -16,8 +16,9 @@ class CreateFormulasTable extends Migration
         Schema::create('formulas', function (Blueprint $table) {
             $table->id();
             $table->string('formula');
-            $table->text('lista_passos')->nullable();
+            $table->string('exe_hash');
             $table->timestamps();
+          
         });
     }
 

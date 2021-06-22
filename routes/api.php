@@ -27,6 +27,13 @@ Route::get('users', 'Api\UserController@index');
 Route::post('derivacao/inicializar', 'Api\CalculoProposicionalController@Derivacao');
 Route::post('derivacao/derivar', 'Api\CalculoProposicionalController@Derivar');
 
+
+Route::post('derivacao/inicializar/exercicio/{id}', 'Api\CalculoProposicionalExercicioController@Derivacao');
+Route::post('derivacao/derivar/exercicio/{id}', 'Api\CalculoProposicionalExercicioController@Derivar');
+
+
+
+
 Route::group(['middleware'=>['apiJwt']],function(){
     Route::post('auth/logout', 'Api\AuthController@logout');
     // Route::get('users', 'Api\UserController@index');

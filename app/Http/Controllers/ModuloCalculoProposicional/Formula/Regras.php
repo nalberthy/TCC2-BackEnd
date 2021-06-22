@@ -18,11 +18,13 @@ class Regras extends Controller
         $newpremissa2 = clone $premissa2->getPremissa()->getValor_obj();
 
         if($newpremissa1->getTipo()=="CONDICIONAL"){
+            // pega valor da esquerda e compara com valor da segunda premissa
             if($newpremissa1->getEsquerdaValor()==$newpremissa2->getValor()){
                 if($newpremissa2->getNegado()==$newpremissa1->getEsquerda()->getNegado()){
                     return $this->arg->derivacao($this->arg->criarPremissa($newpremissa1->getDireita()));
                 }
             }
+            
         }
         elseif($newpremissa2->getTipo()=="CONDICIONAL"){
             if($newpremissa2->getEsquerdaValor()==$newpremissa1->getValor()){

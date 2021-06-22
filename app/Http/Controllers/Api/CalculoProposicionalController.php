@@ -97,13 +97,13 @@ class CalculoProposicionalController extends Controller
  
         if ($derivacaofinal != FALSE){
             if($this->constr->verificaConclusao($conclusao,$derivacaofinal)==TRUE){
-                $msg='True';
+                $msg='Atingiu a Conclusão';
             }
         }
 
 
         if($derivacaofinal==False){
-            $msg='False';
+            $msg='Erro ao Tentar Derivar';
             $derivacoes=$this->constr->gerar($derivacaoPasso,$premissas);
             $formula=$this->arg->formula($premissas,$conclusao);
             $listaDerivacoes =json_encode ($listaDerivacoes);

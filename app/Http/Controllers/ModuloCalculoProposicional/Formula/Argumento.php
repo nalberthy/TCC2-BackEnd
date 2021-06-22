@@ -274,16 +274,16 @@ class Argumento extends Controller
             }
             switch ($argumento->getTipo()) {
                 case 'CONJUNCAO':
-                    $string = $negacao.''.$this->stringArg($argumento->getEsquerda()).' ^ '.$this->stringArg($argumento->getDireita()).'';
+                    $string = $negacao.'('.$this->stringArg($argumento->getEsquerda()).' ^ '.$this->stringArg($argumento->getDireita()).')';
                     break;
                 case 'BICONDICIONAL':
-                    $string = $negacao.''.$this->stringArg($argumento->getEsquerda()).' ↔ '.$this->stringArg($argumento->getDireita()).'';
+                    $string = $negacao.'('.$this->stringArg($argumento->getEsquerda()).' ↔ '.$this->stringArg($argumento->getDireita()).')';
                     break;
                 case 'CONDICIONAL':
-                    $string = $negacao.''.$this->stringArg($argumento->getEsquerda()).' → '.$this->stringArg($argumento->getDireita()).'';
+                    $string = $negacao.'('.$this->stringArg($argumento->getEsquerda()).' → '.$this->stringArg($argumento->getDireita()).')';
                     break;
                 case 'DISJUNCAO':
-                    $string =$negacao.''.$this->stringArg($argumento->getEsquerda()).' v '.$this->stringArg($argumento->getDireita()).'';
+                    $string =$negacao.'('.$this->stringArg($argumento->getEsquerda()).' v '.$this->stringArg($argumento->getDireita()).')';
                     break;
             }
             return $string;
